@@ -21,6 +21,7 @@ if "df" not in st.session_state:
                 "Number of Acts": 3,
                 "Genre": "Drama",
                 "First Performance Year": 1990,
+                "Submitted By": '',
             }
         ]
         st.session_state.df = pd.DataFrame(data)
@@ -48,11 +49,11 @@ if option == "Display Plays":
         if display_language == "Marathi":
             display_df = st.session_state.df.rename(columns={
                 "Title (Marathi)": "Title", "Author (Marathi)": "Author"
-            })[["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year"]]
+            })[["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]]
         else:
             display_df = st.session_state.df.rename(columns={
                 "Title (English)": "Title", "Author (English)": "Author"
-            })[["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year"]]
+            })[["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]]
 
         # Filters
         genre_filter = st.sidebar.text_input("Filter by Genre (e.g., Drama, Comedy)")
@@ -96,6 +97,7 @@ elif option == "Add a New Play":
         num_acts = st.number_input("Number of Acts", min_value=1, help="Optional.")
         genre = st.text_input("Genre", help="Optional.")
         first_year = st.number_input("First Performance Year", min_value=1500, max_value=2024, help="Optional.")
+        submitted_by = st.number_input("Submitted By", help="Optional.")
 
         # Submit button
         submitted = st.form_submit_button("Submit")
@@ -110,6 +112,7 @@ elif option == "Add a New Play":
                 "Number of Acts": num_acts,
                 "Genre": genre,
                 "First Performance Year": first_year,
+                "Submitted By": '',
             }
 
             # Validate compulsory fields
