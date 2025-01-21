@@ -56,20 +56,30 @@ if option == "Display Plays":
             })[["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]]
 
         # Filters
-        genre_filter = st.sidebar.text_input("Filter by Genre (e.g., Drama, Comedy)")
-        acts = st.sidebar.number_input("Filter by num acts", min_value=1, max_value=11, value=1)
+        st.write("Filtering:")
+        genre_filter = st.sidebar.text_input("By Genre (e.g., Drama, Comedy)")
+        acts = st.sidebar.text_input("By number of acts")
+        author_m = st.sidebar.text_input("By लेखक")
         year_min = st.sidebar.number_input("Filter by Min Year", min_value=1500, max_value=2024, value=1500)
         year_max = st.sidebar.number_input("Filter by Max Year", min_value=1500, max_value=2024, value=2024)
+        #st.write(acts)
 
         # Apply filters
         filtered_df = st.session_state.df.copy()
+        
         if genre_filter:
             filtered_df = filtered_df[filtered_df["Genre"].str.contains(genre_filter, case=False, na=False)]
+        #st.write(filtered_df)
+        if acts:
+            filtered_df = filtered_df[(filtered_df["Number of Acts"] == acts)]
+        if author_m:
+            filtered_df = filtered_df[filtered_df["Author (Marathi)"].str.contains(author_m, na=False)]
+
+        #st.write(filtered_df)
         filtered_df = filtered_df[
             (filtered_df["First Performance Year"] >= year_min)
             & (filtered_df["First Performance Year"] <= year_max)
         ]
-        filtered_df = filtered_df[(filtered_df["Number of Acts"] == acts)]
 
         # Display filtered data
         st.dataframe(filtered_df)
