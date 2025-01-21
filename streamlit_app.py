@@ -57,6 +57,7 @@ if option == "Display Plays":
 
         # Filters
         genre_filter = st.sidebar.text_input("Filter by Genre (e.g., Drama, Comedy)")
+        acts = st.sidebar.number_input("Filter by num acts", min_value=1, max_value=11, value=1)
         year_min = st.sidebar.number_input("Filter by Min Year", min_value=1500, max_value=2024, value=1500)
         year_max = st.sidebar.number_input("Filter by Max Year", min_value=1500, max_value=2024, value=2024)
 
@@ -68,6 +69,7 @@ if option == "Display Plays":
             (filtered_df["First Performance Year"] >= year_min)
             & (filtered_df["First Performance Year"] <= year_max)
         ]
+        filtered_df = filtered_df[(filtered_df["Number of Acts"] == acts)]
 
         # Display filtered data
         st.dataframe(filtered_df)
