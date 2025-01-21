@@ -89,8 +89,22 @@ if option == "Display Plays":
         if not filtered_df.empty:
             selected_play = st.selectbox("Select a play", options=filtered_df["Title (English)"])
             details = filtered_df[filtered_df["Title (English)"] == selected_play].iloc[0].to_dict()
+            
+            updated_details = {}
             for key, value in details.items():
-                st.write(f"**{key}**: {value}")
+                updated_value = st.text_input(f"**{key}**", value)
+                updated_details[key] = updated_value
+            
+            passphrase = st.text_input("Enter passphrase to save changes", type="password")
+            
+            if st.button("Save Changes"):
+                if passphrase == "nakat":  # Replace with your actual passphrase
+                    for key, value in updated_details.items():
+                        filtered_df.loc[filtered_df["Title (English)"] == selected_play, key] = value
+                    filtered_df.to_csv('plays.csv', index=False)
+                    st.success("Changes saved successfully!")
+                else:
+                    st.error("Incorrect passphrase. Changes not saved.")
 
 # Add a New Play
 elif option == "Add a New Play":
