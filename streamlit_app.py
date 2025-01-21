@@ -100,8 +100,8 @@ if option == "Display Plays":
             if st.button("Save Changes"):
                 if passphrase == "nakat":  # Replace with your actual passphrase
                     for key, value in updated_details.items():
-                        filtered_df.loc[filtered_df["Title (English)"] == selected_play, key] = value
-                    filtered_df.to_csv('plays.csv', index=False)
+                        st.session_state.df.loc[st.session_state.df["Title (English)"] == selected_play, key] = value
+                    st.session_state.df.to_csv('plays.csv', index=False)
                     st.success("Changes saved successfully!")
                 else:
                     st.error("Incorrect passphrase. Changes not saved.")
