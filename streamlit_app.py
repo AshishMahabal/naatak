@@ -56,39 +56,32 @@ if option == "Display Plays":
             })[["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]]
 
         # Filters
-        st.write("Filtering:")
+        st.sidebar.write("Filtering:")
         genre_filter = st.sidebar.text_input("By Genre (e.g., Drama, Comedy)")
         acts = st.sidebar.text_input("By number of acts")
         author_m = st.sidebar.text_input("By लेखक")
         year_min = st.sidebar.number_input("Filter by Min Year", min_value=1500, max_value=2024, value=1500)
         year_max = st.sidebar.number_input("Filter by Max Year", min_value=1500, max_value=2024, value=2024)
-        #st.write(acts)
 
-        # Apply filters
-        filtered_df = st.session_state.df.copy()
-        
+        # Apply filters to display_df
         if genre_filter:
-            filtered_df = filtered_df[filtered_df["Genre"].str.contains(genre_filter, case=False, na=False)]
-        #st.write(filtered_df)
+            display_df = display_df[display_df["Genre"].str.contains(genre_filter, case=False, na=False)]
         if acts:
-            filtered_df = filtered_df[(filtered_df["Number of Acts"] == acts)]
+            display_df = display_df[display_df["Number of Acts"] == int(acts)]
         if author_m:
-            filtered_df = filtered_df[filtered_df["Author (Marathi)"].str.contains(author_m, na=False)]
+            display_df = display_df[display_df["Author"].str.contains(author_m, case=False, na=False)]
+        display_df = display_df[(display_df["First Performance Year"] >= year_min) & (display_df["First Performance Year"] <= year_max)]
 
-        #st.write(filtered_df)
-        filtered_df = filtered_df[
-            (filtered_df["First Performance Year"] >= year_min)
-            & (filtered_df["First Performance Year"] <= year_max)
-        ]
-
-        # Display filtered data
-        st.dataframe(filtered_df)
+        # Display the filtered DataFrame
+        st.write(display_df)
 
         # Play details
         st.write("### Play Details")
-        if not filtered_df.empty:
-            selected_play = st.selectbox("Select a play", options=filtered_df["Title (English)"])
-            details = filtered_df[filtered_df["Title (English)"] == selected_play].iloc[0].to_dict()
+        if not display_df.empty:
+            col1, col2 = st.columns(2)
+            with col1:
+                selected_play = st.selectbox("Select a play", options=display_df["Title"])
+            details = display_df[display_df["Title"] == selected_play].iloc[0].to_dict()
             
             updated_details = {}
             for key, value in details.items():
