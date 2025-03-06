@@ -13,10 +13,10 @@ if "df" not in st.session_state:
         # Create dummy data if CSV doesn't exist
         data = [
             {
-                "Title (Marathi)": "नाटक 1",
-                "Title (English)": "Play 1",
-                "Author (Marathi)": "लेखक अ",
-                "Author (English)": "Author A",
+                "Title_Marathi": "नाटक 1",
+                "Title_English": "Play 1",
+                "Author_Marathi": "लेखक अ",
+                "Author_English": "Author A",
                 "Length": 120,
                 "Number of Acts": 3,
                 "Genre": "Drama",
@@ -26,6 +26,10 @@ if "df" not in st.session_state:
         ]
         st.session_state.df = pd.DataFrame(data)
         st.session_state.df.to_csv(csv_file, index=False)
+
+# Convert columns to numeric
+st.session_state.df["First Performance Year"] = pd.to_numeric(st.session_state.df["First Performance Year"], errors="coerce")
+st.session_state.df["Number of Acts"] = pd.to_numeric(st.session_state.df["Number of Acts"], errors="coerce")
 
 # Helper function to save DataFrame to CSV
 def save_to_csv():
@@ -47,13 +51,13 @@ if option == "Display Plays":
         display_language = st.sidebar.radio("Select Display Language", ["Marathi", "English"])
 
         if display_language == "Marathi":
-            display_df = st.session_state.df.rename(columns={
-                "Title (Marathi)": "Title", "Author (Marathi)": "Author"
-            })[["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]]
+            # Select only Marathi-specific columns and rename them
+            display_df = st.session_state.df[["Title_Marathi", "Author_Marathi", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]].copy()
+            display_df.columns = ["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]
         else:
-            display_df = st.session_state.df.rename(columns={
-                "Title (English)": "Title", "Author (English)": "Author"
-            })[["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]]
+            # Use only the English-specific columns and rename them
+            display_df = st.session_state.df[["Title_English", "Author_English", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]].copy()
+            display_df.columns = ["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]
 
         # Filters
         st.sidebar.write("Filtering:")
@@ -92,8 +96,29 @@ if option == "Display Plays":
             
             if st.button("Save Changes"):
                 if passphrase == "nakat":  # Replace with your actual passphrase
+                    # Determine the underlying title and author columns based on display language
+                    if display_language == "Marathi":
+                        title_col = "Title_Marathi"
+                        author_col = "Author_Marathi"
+                    else:
+                        title_col = "Title_English"
+                        author_col = "Author_English"
+
+                    # Update each field appropriately:
                     for key, value in updated_details.items():
-                        st.session_state.df.loc[st.session_state.df["Title (English)"] == selected_play, key] = value
+                        if key == "Title":
+                            st.session_state.df.loc[
+                                st.session_state.df[title_col] == selected_play, title_col
+                            ] = value
+                        elif key == "Author":
+                            st.session_state.df.loc[
+                                st.session_state.df[author_col] == selected_play, author_col
+                            ] = value
+                        else:
+                            # For other fields, update directly using the row identified by the title in the language-specific column.
+                            st.session_state.df.loc[
+                                st.session_state.df[title_col] == selected_play, key
+                            ] = value
                     st.session_state.df.to_csv('plays.csv', index=False)
                     st.success("Changes saved successfully!")
                 else:
@@ -106,27 +131,27 @@ elif option == "Add a New Play":
     # Form for adding a new play
     with st.form("Add Play Form"):
         # Compulsory Fields
-        title_marathi = st.text_input("Title (Marathi)", help="This field is compulsory.")
-        title_english = st.text_input("Title (English)", help="This field is compulsory.")
-        author_marathi = st.text_input("Author (Marathi)", help="This field is compulsory.")
-        author_english = st.text_input("Author (English)", help="This field is compulsory.")
+        title_marathi = st.text_input("Title_Marathi", help="This field is compulsory.")
+        title_english = st.text_input("Title_English", help="This field is compulsory.")
+        author_marathi = st.text_input("Author_Marathi", help="This field is compulsory.")
+        author_english = st.text_input("Author_English", help="This field is compulsory.")
 
         # Optional Fields
         length = st.number_input("Length (in minutes)", min_value=1, help="Optional.")
         num_acts = st.number_input("Number of Acts", min_value=1, help="Optional.")
         genre = st.text_input("Genre", help="Optional.")
         first_year = st.number_input("First Performance Year", min_value=1500, max_value=2024, help="Optional.")
-        submitted_by = st.number_input("Submitted By", help="Optional.")
+        submitted_by = st.text_input("Submitted By", help="Optional.")
 
         # Submit button
         submitted = st.form_submit_button("Submit")
         if submitted:
             # Prepare new entry
             new_entry = {
-                "Title (Marathi)": title_marathi,
-                "Title (English)": title_english,
-                "Author (Marathi)": author_marathi,
-                "Author (English)": author_english,
+                "Title_Marathi": title_marathi,
+                "Title_English": title_english,
+                "Author_Marathi": author_marathi,
+                "Author_English": author_english,
                 "Length": length,
                 "Number of Acts": num_acts,
                 "Genre": genre,
