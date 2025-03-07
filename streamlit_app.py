@@ -21,15 +21,50 @@ if "df" not in st.session_state:
                 "Number of Acts": 3,
                 "Genre": "Drama",
                 "First Performance Year": 1990,
-                "Submitted By": '',
+                "Submitted By": "",
+                "Male Characters": 0,
+                "Female Characters": 0,
+                "Pages": 0,
+                "Property": "",
+                "Year of Writing": 0,
+                "Availability": "",
+                "YouTube": "",
+                "Certified By": ""
             }
         ]
         st.session_state.df = pd.DataFrame(data)
         st.session_state.df.to_csv(csv_file, index=False)
 
-# Convert columns to numeric
+
+# List of new columns with their default values
+new_columns = {
+    "Male Characters": 0,
+    "Female Characters": 0,
+    "Pages": 0,
+    "Property": "",
+    "Year of Writing": 0,
+    "Availability": "",
+    "YouTube": "",
+    "Certified By": ""
+}
+
+# Check if each new column exists; if not, add it with a default value
+for col, default_val in new_columns.items():
+    if col not in st.session_state.df.columns:
+        st.session_state.df[col] = default_val
+
+# Convert numeric columns appropriately
 st.session_state.df["First Performance Year"] = pd.to_numeric(st.session_state.df["First Performance Year"], errors="coerce")
 st.session_state.df["Number of Acts"] = pd.to_numeric(st.session_state.df["Number of Acts"], errors="coerce")
+st.session_state.df["Length"] = pd.to_numeric(st.session_state.df["Length"], errors="coerce")
+st.session_state.df["Male Characters"] = pd.to_numeric(st.session_state.df["Male Characters"], errors="coerce")
+st.session_state.df["Female Characters"] = pd.to_numeric(st.session_state.df["Female Characters"], errors="coerce")
+st.session_state.df["Pages"] = pd.to_numeric(st.session_state.df["Pages"], errors="coerce")
+st.session_state.df["Year of Writing"] = pd.to_numeric(st.session_state.df["Year of Writing"], errors="coerce")
+
+# Optionally, save the updated DataFrame back to the CSV
+st.session_state.df.to_csv(csv_file, index=False)
+st.success("CSV updated with new columns.")
 
 # Helper function to save DataFrame to CSV
 def save_to_csv():
@@ -51,18 +86,32 @@ if option == "Display Plays":
         display_language = st.sidebar.radio("Select Display Language", ["Marathi", "English"])
 
         if display_language == "Marathi":
-            # Select only Marathi-specific columns and rename them
-            display_df = st.session_state.df[["Title_Marathi", "Author_Marathi", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]].copy()
-            display_df.columns = ["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]
+            display_df = st.session_state.df[[
+                "Title_Marathi", "Author_Marathi", "Length", "Number of Acts", "Genre",
+                "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
+                "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
+            ]].copy()
+            display_df.columns = [
+                "Title", "Author", "Length", "Number of Acts", "Genre",
+                "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
+                "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
+            ]
         else:
-            # Use only the English-specific columns and rename them
-            display_df = st.session_state.df[["Title_English", "Author_English", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]].copy()
-            display_df.columns = ["Title", "Author", "Length", "Number of Acts", "Genre", "First Performance Year", "Submitted By"]
+            display_df = st.session_state.df[[
+                "Title_English", "Author_English", "Length", "Number of Acts", "Genre",
+                "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
+                "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
+            ]].copy()
+            display_df.columns = [
+                "Title", "Author", "Length", "Number of Acts", "Genre",
+                "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
+                "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
+            ]
 
         # Filters
         st.sidebar.write("Filtering:")
         genre_filter = st.sidebar.text_input("By Genre (e.g., Drama, Comedy)")
-        acts = st.sidebar.text_input("By number of acts")
+        acts = st.sidebar.text_input("By Number of Acts")
         author_m = st.sidebar.text_input("By लेखक")
         year_min = st.sidebar.number_input("Filter by Min Year", min_value=1500, max_value=2024, value=1500)
         year_max = st.sidebar.number_input("Filter by Max Year", min_value=1500, max_value=2024, value=2024)
@@ -74,12 +123,13 @@ if option == "Display Plays":
             display_df = display_df[display_df["Number of Acts"] == int(acts)]
         if author_m:
             display_df = display_df[display_df["Author"].str.contains(author_m, case=False, na=False)]
-        display_df = display_df[(display_df["First Performance Year"] >= year_min) & (display_df["First Performance Year"] <= year_max)]
+        display_df = display_df[(display_df["First Performance Year"] >= year_min) & 
+                                (display_df["First Performance Year"] <= year_max)]
 
         # Display the filtered DataFrame
         st.write(display_df)
 
-        # Play details
+        # Play details update section
         st.write("### Play Details")
         if not display_df.empty:
             col1, col2 = st.columns(2)
@@ -96,14 +146,13 @@ if option == "Display Plays":
             
             if st.button("Save Changes"):
                 if passphrase == "nakat":  # Replace with your actual passphrase
-                    # Determine the underlying title and author columns based on display language
                     if display_language == "Marathi":
                         title_col = "Title_Marathi"
                         author_col = "Author_Marathi"
                     else:
                         title_col = "Title_English"
                         author_col = "Author_English"
-
+                    
                     # Update each field appropriately:
                     for key, value in updated_details.items():
                         if key == "Title":
@@ -115,11 +164,10 @@ if option == "Display Plays":
                                 st.session_state.df[author_col] == selected_play, author_col
                             ] = value
                         else:
-                            # For other fields, update directly using the row identified by the title in the language-specific column.
                             st.session_state.df.loc[
                                 st.session_state.df[title_col] == selected_play, key
                             ] = value
-                    st.session_state.df.to_csv('plays.csv', index=False)
+                    st.session_state.df.to_csv(csv_file, index=False)
                     st.success("Changes saved successfully!")
                 else:
                     st.error("Incorrect passphrase. Changes not saved.")
@@ -128,7 +176,6 @@ if option == "Display Plays":
 elif option == "Add a New Play":
     st.title("Add a New Marathi Play")
 
-    # Form for adding a new play
     with st.form("Add Play Form"):
         # Compulsory Fields
         title_marathi = st.text_input("Title_Marathi", help="This field is compulsory.")
@@ -142,11 +189,17 @@ elif option == "Add a New Play":
         genre = st.text_input("Genre", help="Optional.")
         first_year = st.number_input("First Performance Year", min_value=1500, max_value=2024, help="Optional.")
         submitted_by = st.text_input("Submitted By", help="Optional.")
+        male_chars = st.number_input("Number of Male Characters", min_value=0, help="Optional.")
+        female_chars = st.number_input("Number of Female Characters", min_value=0, help="Optional.")
+        pages = st.number_input("Number of Pages", min_value=0, help="Optional.")
+        property_val = st.text_input("Property", help="Optional.")
+        year_writing = st.number_input("Year of Writing", min_value=1500, max_value=2024, help="Optional.")
+        availability = st.text_input("Availability", help="Optional.")
+        youtube_link = st.text_input("YouTube (Link)", help="Optional.")
+        certified_by = st.text_input("Certified By", help="Optional.")
 
-        # Submit button
         submitted = st.form_submit_button("Submit")
         if submitted:
-            # Prepare new entry
             new_entry = {
                 "Title_Marathi": title_marathi,
                 "Title_English": title_english,
@@ -156,23 +209,27 @@ elif option == "Add a New Play":
                 "Number of Acts": num_acts,
                 "Genre": genre,
                 "First Performance Year": first_year,
-                "Submitted By": '',
+                "Submitted By": submitted_by,
+                "Male Characters": male_chars,
+                "Female Characters": female_chars,
+                "Pages": pages,
+                "Property": property_val,
+                "Year of Writing": year_writing,
+                "Availability": availability,
+                "YouTube": youtube_link,
+                "Certified By": certified_by
             }
 
-            # Validate compulsory fields
             if not title_marathi or not title_english or not author_marathi or not author_english:
                 st.error("Please fill out all compulsory fields: Title and Author (both Marathi and English).")
             else:
-                # Append new entry to session state DataFrame
                 st.session_state.df = pd.concat([st.session_state.df, pd.DataFrame([new_entry])], ignore_index=True)
-                save_to_csv()  # Save to CSV
+                save_to_csv()
                 st.success("New play added successfully!")
                 st.dataframe(st.session_state.df)
 
 # Export Data
 elif option == "Export Data":
     st.title("Export Database")
-
-    # Button to save data
     if st.button("Save to CSV"):
         save_to_csv()
