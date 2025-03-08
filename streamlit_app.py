@@ -205,6 +205,20 @@ if option == "Display Plays":
                     except ValueError:
                         default_index = 0
                     updated_value = st.radio("**Property**", options=property_options, index=default_index, key=f"upd_{selected_play}_Property", horizontal=True)
+                elif key == "Availability":
+                    availability_options = ["Print", "Abhivyakti", "CALAA", "NULL"]
+                    st.write("**Availability**")
+                    avail_selected = []
+                    num_per_row = len(availability_options)
+                    upd_cols = st.columns(num_per_row)
+                    for i, opt in enumerate(availability_options):
+                        # Pre-select if the current value string contains this option.
+                        preselected = opt in value.split(";") if isinstance(value, str) else False
+                        if upd_cols[i].checkbox(opt, value=preselected, key=f"upd_{selected_play}_{opt}"):
+                            avail_selected.append(opt)
+                    if "NULL" in avail_selected and len(avail_selected) > 1:
+                        avail_selected.remove("NULL")
+                    updated_value = "; ".join(avail_selected)
                 else:
                     updated_value = st.text_input(f"**{key}**", value)
                 updated_details[key] = updated_value
@@ -277,7 +291,20 @@ elif option == "Add a New Play":
         property_val = st.radio("Property", options=property_options, index=0, horizontal=True)
         st.write("Selected:", property_val)
         year_writing = st.number_input("Year of Writing", min_value=1500, max_value=2024, help="Optional.")
-        availability = st.text_input("Availability", help="Optional.")
+        availability_options = ["Print", "Abhivyakti", "CALAA", "NULL"]
+        st.write("Availability")
+        avail_selected = []
+        num_per_row = len(availability_options)
+        cols = st.columns(num_per_row)
+        for i, opt in enumerate(availability_options):
+            if cols[i].checkbox(opt, key=f"avail_{opt}"):
+                avail_selected.append(opt)
+        # If any non-NULL option is selected, remove "NULL" even if checked.
+        if "NULL" in avail_selected and len(avail_selected) > 1:
+            avail_selected.remove("NULL")
+        # Join selections into a string (or process as needed)
+        availability = "; ".join(avail_selected)
+        st.write("Selected: ", availability)
         youtube_link = st.text_input("YouTube (Link)", help="Optional.")
         certified_by = st.text_input("Certified By", help="Optional.")
 
