@@ -73,9 +73,9 @@ st.session_state.df["Pages"] = pd.to_numeric(st.session_state.df["Pages"], error
 st.session_state.df["Year of Writing"] = pd.to_numeric(st.session_state.df["Year of Writing"], errors="coerce")
 st.session_state.df["Genre"] = st.session_state.df["Genre"].fillna("").astype(str)
 
-# Optionally, save the updated DataFrame back to the CSV
-st.session_state.df.to_csv(csv_file, index=False)
-st.success("CSV updated with new columns.")
+# # Optionally, save the updated DataFrame back to the CSV
+# st.session_state.df.to_csv(csv_file, index=False)
+# st.success("CSV updated with new columns.")
 
 # Helper function to save DataFrame to CSV
 def save_to_csv():
@@ -149,6 +149,7 @@ if option == "Display Plays":
         display_df = display_df[(display_df["First Performance Year"] >= year_min) & 
                                 (display_df["First Performance Year"] <= year_max)]
 
+        st.write(f"Number of plays found: {len(display_df)}")
         # Display the filtered DataFrame
         st.write(display_df)
 
