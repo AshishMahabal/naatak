@@ -185,6 +185,14 @@ if option == "Display Plays":
                                 if upd_cols[j].checkbox(g, value=(g in preselected), key=f"upd_{selected_play}_{g}"):
                                     upd_selected.append(g)
                     updated_value = "; ".join(upd_selected)
+                elif key == "Property":
+                    property_options = ["No property", "Minimal", "Extensive", "Different acts", "Unknown"]
+                    # Set default index based on current value or default to 0 if not in options
+                    try:
+                        default_index = property_options.index(value)
+                    except ValueError:
+                        default_index = 0
+                    updated_value = st.radio("**Property**", options=property_options, index=default_index, key=f"upd_{selected_play}_Property")
                 else:
                     updated_value = st.text_input(f"**{key}**", value)
                 updated_details[key] = updated_value
@@ -252,7 +260,9 @@ elif option == "Add a New Play":
         male_chars = st.number_input("Number of Male Characters", min_value=0, help="Optional.")
         female_chars = st.number_input("Number of Female Characters", min_value=0, help="Optional.")
         pages = st.number_input("Number of Pages", min_value=0, help="Optional.")
-        property_val = st.text_input("Property", help="Optional.")
+        property_options = ["Unknown", "No property", "Minimal", "Extensive", "Different acts"]
+        property_val = st.radio("Property", options=property_options, index=0, horizontal=True)
+        st.write("Selected:", property_val)
         year_writing = st.number_input("Year of Writing", min_value=1500, max_value=2024, help="Optional.")
         availability = st.text_input("Availability", help="Optional.")
         youtube_link = st.text_input("YouTube (Link)", help="Optional.")
