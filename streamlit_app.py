@@ -103,7 +103,7 @@ if option == "Display Plays":
                 "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
             ]].copy()
             display_df.columns = [
-                "Title", "Author", "Length", "Number of Acts", "Genre",
+                "Title", "Author", "Length (in minutes)", "Number of Acts", "Genre",
                 "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
                 "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
             ]
@@ -114,7 +114,7 @@ if option == "Display Plays":
                 "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
             ]].copy()
             display_df.columns = [
-                "Title", "Author", "Length", "Number of Acts", "Genre",
+                "Title", "Author", "Length (in minutes)", "Number of Acts", "Genre",
                 "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
                 "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
             ]
