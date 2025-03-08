@@ -133,7 +133,8 @@ if option == "Display Plays":
                     opt = filter_genre_options[idx]
                     if cols[j].checkbox(opt, key=f"filter_{opt}"):
                         filter_selected.append(opt)
-        acts = st.sidebar.text_input("By Number of Acts")
+        act_options_sidebar = [1, 1.5, 2, 3, 4, 0, -1]
+        acts = st.sidebar.radio("By Number of Acts", options=act_options_sidebar, horizontal=True)
         author_m = st.sidebar.text_input("By लेखक")
         year_min = st.sidebar.number_input("Filter by Min Year", min_value=1500, max_value=2024, value=1500)
         year_max = st.sidebar.number_input("Filter by Max Year", min_value=1500, max_value=2024, value=2024)
@@ -144,8 +145,12 @@ if option == "Display Plays":
         if filter_selected:
             # Retain rows if any of the selected genres appear in the Genre string.
             display_df = display_df[display_df["Genre"].apply(lambda s: any(filt in s for filt in filter_selected))]
-        if acts:
-            display_df = display_df[display_df["Number of Acts"] == int(acts)]
+        if acts > 0:
+            display_df = display_df[display_df["Number of Acts"] == acts]
+        elif acts == 0:
+            display_df = display_df[display_df["Number of Acts"].isna()]
+        # else:
+        #     display_df = display_df[display_df["Number of Acts"] > 0]
         if author_m:
             display_df = display_df[display_df["Author"].str.contains(author_m, case=False, na=False)]
         display_df = display_df[(display_df["First Performance Year"] >= year_min) & 
@@ -185,6 +190,13 @@ if option == "Display Plays":
                                 if upd_cols[j].checkbox(g, value=(g in preselected), key=f"upd_{selected_play}_{g}"):
                                     upd_selected.append(g)
                     updated_value = "; ".join(upd_selected)
+                elif key == "Number of Acts":
+                    act_options = [1, 1.5, 2, 3, 4]
+                    try:
+                        default_index = act_options.index(value)
+                    except ValueError:
+                        default_index = 0
+                    updated_value = st.radio("**Number of Acts**", options=act_options, index=default_index, key=f"upd_{selected_play}_acts", horizontal=True)
                 elif key == "Property":
                     property_options = ["Unknown", "No property", "Minimal", "Extensive", "Different acts"]
                     # Set default index based on current value or default to 0 if not in options
@@ -240,7 +252,8 @@ elif option == "Add a New Play":
 
         # Optional Fields
         length = st.number_input("Length (in minutes)", min_value=1, help="Optional.")
-        num_acts = st.number_input("Number of Acts", min_value=1, help="Optional.")
+        act_options = [1, 1.5, 2, 3, 4]
+        num_acts = st.radio("Number of Acts", options=act_options, index=0, horizontal=True)
         st.write("Select Genre(s) (optional):")
         genre_options = ["Comedy", "Drama", "Farce", "Historical", "Musical", "Romance", "Satire", "Sci-Fi", "Tragedy", "Other"]
         add_selected = []
