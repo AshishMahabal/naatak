@@ -186,13 +186,13 @@ if option == "Display Plays":
                                     upd_selected.append(g)
                     updated_value = "; ".join(upd_selected)
                 elif key == "Property":
-                    property_options = ["No property", "Minimal", "Extensive", "Different acts", "Unknown"]
+                    property_options = ["Unknown", "No property", "Minimal", "Extensive", "Different acts"]
                     # Set default index based on current value or default to 0 if not in options
                     try:
                         default_index = property_options.index(value)
                     except ValueError:
                         default_index = 0
-                    updated_value = st.radio("**Property**", options=property_options, index=default_index, key=f"upd_{selected_play}_Property")
+                    updated_value = st.radio("**Property**", options=property_options, index=default_index, key=f"upd_{selected_play}_Property", horizontal=True)
                 else:
                     updated_value = st.text_input(f"**{key}**", value)
                 updated_details[key] = updated_value
