@@ -8,7 +8,17 @@ csv_file = "plays.csv"
 # Load or initialize the DataFrame
 if "df" not in st.session_state:
     if os.path.exists(csv_file):
-        st.session_state.df = pd.read_csv(csv_file)
+        st.session_state.df = pd.read_csv(
+            csv_file,
+            dtype={
+                "Genre": str,
+                "Submitted By": str,
+                "Property": str,
+                "Availability": str,
+                "YouTube": str,
+                "Certified By": str
+            }
+        )
     else:
         # Create dummy data if CSV doesn't exist
         data = [
@@ -36,22 +46,22 @@ if "df" not in st.session_state:
         st.session_state.df.to_csv(csv_file, index=False)
 
 
-# List of new columns with their default values
-new_columns = {
-    "Male Characters": 0,
-    "Female Characters": 0,
-    "Pages": 0,
-    "Property": "",
-    "Year of Writing": 0,
-    "Availability": "",
-    "YouTube": "",
-    "Certified By": ""
-}
+# # List of new columns with their default values
+# new_columns = {
+#     "Male Characters": 0,
+#     "Female Characters": 0,
+#     "Pages": 0,
+#     "Property": "",
+#     "Year of Writing": 0,
+#     "Availability": "",
+#     "YouTube": "",
+#     "Certified By": ""
+# }
 
-# Check if each new column exists; if not, add it with a default value
-for col, default_val in new_columns.items():
-    if col not in st.session_state.df.columns:
-        st.session_state.df[col] = default_val
+# # Check if each new column exists; if not, add it with a default value
+# for col, default_val in new_columns.items():
+#     if col not in st.session_state.df.columns:
+#         st.session_state.df[col] = default_val
 
 # Convert numeric columns appropriately
 st.session_state.df["First Performance Year"] = pd.to_numeric(st.session_state.df["First Performance Year"], errors="coerce")
@@ -61,6 +71,7 @@ st.session_state.df["Male Characters"] = pd.to_numeric(st.session_state.df["Male
 st.session_state.df["Female Characters"] = pd.to_numeric(st.session_state.df["Female Characters"], errors="coerce")
 st.session_state.df["Pages"] = pd.to_numeric(st.session_state.df["Pages"], errors="coerce")
 st.session_state.df["Year of Writing"] = pd.to_numeric(st.session_state.df["Year of Writing"], errors="coerce")
+st.session_state.df["Genre"] = st.session_state.df["Genre"].fillna("").astype(str)
 
 # Optionally, save the updated DataFrame back to the CSV
 st.session_state.df.to_csv(csv_file, index=False)
@@ -110,15 +121,27 @@ if option == "Display Plays":
 
         # Filters
         st.sidebar.write("Filtering:")
-        genre_filter = st.sidebar.text_input("By Genre (e.g., Drama, Comedy)")
+        st.sidebar.write("Filter by Genre:")
+        filter_genre_options = ["Comedy", "Drama", "Farce", "Historical", "Musical", "Romance", "Satire", "Sci-Fi", "Tragedy", "Other"]
+        filter_selected = []
+        num_per_row = 2
+        for i in range(0, len(filter_genre_options), num_per_row):
+            cols = st.sidebar.columns(num_per_row)
+            for j in range(num_per_row):
+                idx = i + j
+                if idx < len(filter_genre_options):
+                    opt = filter_genre_options[idx]
+                    if cols[j].checkbox(opt, key=f"filter_{opt}"):
+                        filter_selected.append(opt)
         acts = st.sidebar.text_input("By Number of Acts")
         author_m = st.sidebar.text_input("By लेखक")
         year_min = st.sidebar.number_input("Filter by Min Year", min_value=1500, max_value=2024, value=1500)
         year_max = st.sidebar.number_input("Filter by Max Year", min_value=1500, max_value=2024, value=2024)
 
         # Apply filters to display_df
-        if genre_filter:
-            display_df = display_df[display_df["Genre"].str.contains(genre_filter, case=False, na=False)]
+        if filter_selected:
+            # Retain rows if any of the selected genres appear in the Genre string.
+            display_df = display_df[display_df["Genre"].apply(lambda s: any(filt in s for filt in filter_selected))]
         if acts:
             display_df = display_df[display_df["Number of Acts"] == int(acts)]
         if author_m:
@@ -139,7 +162,26 @@ if option == "Display Plays":
             
             updated_details = {}
             for key, value in details.items():
-                updated_value = st.text_input(f"**{key}**", value)
+                if key == "Genre":
+                    genre_options = ["Comedy", "Drama", "Farce", "Historical", "Musical", "Romance", "Satire", "Sci-Fi", "Tragedy", "Other"]
+                    # Ensure the value is a string (convert NaN or None to an empty string)
+                    value_str = value if isinstance(value, str) else ""
+                    # Split the current genre string by semicolon to get pre-selected genres
+                    preselected = [g.strip() for g in value_str.split(";")] if value_str else []
+                    st.write("**Genre**")
+                    upd_selected = []
+                    num_per_row = 5
+                    for i in range(0, len(genre_options), num_per_row):
+                        upd_cols = st.columns(num_per_row)
+                        for j in range(num_per_row):
+                            idx = i + j
+                            if idx < len(genre_options):
+                                g = genre_options[idx]
+                                if upd_cols[j].checkbox(g, value=(g in preselected), key=f"upd_{selected_play}_{g}"):
+                                    upd_selected.append(g)
+                    updated_value = "; ".join(upd_selected)
+                else:
+                    updated_value = st.text_input(f"**{key}**", value)
                 updated_details[key] = updated_value
             
             passphrase = st.text_input("Enter passphrase to save changes", type="password")
@@ -186,7 +228,20 @@ elif option == "Add a New Play":
         # Optional Fields
         length = st.number_input("Length (in minutes)", min_value=1, help="Optional.")
         num_acts = st.number_input("Number of Acts", min_value=1, help="Optional.")
-        genre = st.text_input("Genre", help="Optional.")
+        st.write("Select Genre(s) (optional):")
+        genre_options = ["Comedy", "Drama", "Farce", "Historical", "Musical", "Romance", "Satire", "Sci-Fi", "Tragedy", "Other"]
+        add_selected = []
+        num_per_row = 5
+        for i in range(0, len(genre_options), num_per_row):
+            cols = st.columns(num_per_row)
+            for j in range(num_per_row):
+                idx = i + j
+                if idx < len(genre_options):
+                    opt = genre_options[idx]
+                    if cols[j].checkbox(opt, key=f"add_genre_{opt}"):
+                        add_selected.append(opt)
+        # Save as semicolon-separated list; if nothing is selected, genre remains an empty string.
+        genre = "; ".join(add_selected)
         first_year = st.number_input("First Performance Year", min_value=1500, max_value=2024, help="Optional.")
         submitted_by = st.text_input("Submitted By", help="Optional.")
         male_chars = st.number_input("Number of Male Characters", min_value=0, help="Optional.")
