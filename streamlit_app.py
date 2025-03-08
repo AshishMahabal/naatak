@@ -137,6 +137,8 @@ if option == "Display Plays":
         author_m = st.sidebar.text_input("By लेखक")
         year_min = st.sidebar.number_input("Filter by Min Year", min_value=1500, max_value=2024, value=1500)
         year_max = st.sidebar.number_input("Filter by Max Year", min_value=1500, max_value=2024, value=2024)
+        male_chars_range = st.sidebar.slider("Number of Male Characters", min_value=0, max_value=100, value=(0, 10))
+        female_chars_range = st.sidebar.slider("Number of Female Characters", min_value=0, max_value=100, value=(0, 10))
 
         # Apply filters to display_df
         if filter_selected:
@@ -148,6 +150,8 @@ if option == "Display Plays":
             display_df = display_df[display_df["Author"].str.contains(author_m, case=False, na=False)]
         display_df = display_df[(display_df["First Performance Year"] >= year_min) & 
                                 (display_df["First Performance Year"] <= year_max)]
+        display_df = display_df[(display_df["Male Characters"] >= male_chars_range[0]) & (display_df["Male Characters"] <= male_chars_range[1])]
+        display_df = display_df[(display_df["Female Characters"] >= female_chars_range[0]) & (display_df["Female Characters"] <= female_chars_range[1])]
 
         st.write(f"Number of plays found: {len(display_df)}")
         # Display the filtered DataFrame
