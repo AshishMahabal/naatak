@@ -93,31 +93,14 @@ if option == "Display Plays":
     if st.session_state.df.empty:
         st.warning("No data available. Please add plays or upload a database.")
     else:
-        # Display language toggle
-        display_language = st.sidebar.radio("Select Display Language", ["Marathi", "English"])
-
-        if display_language == "Marathi":
-            display_df = st.session_state.df[[
-                "Title_Marathi", "Author_Marathi", "Length", "Number of Acts", "Genre",
-                "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
-                "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
-            ]].copy()
-            display_df.columns = [
-                "Title", "Author", "Length (in minutes)", "Number of Acts", "Genre",
-                "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
-                "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
-            ]
-        else:
-            display_df = st.session_state.df[[
-                "Title_English", "Author_English", "Length", "Number of Acts", "Genre",
-                "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
-                "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
-            ]].copy()
-            display_df.columns = [
-                "Title", "Author", "Length (in minutes)", "Number of Acts", "Genre",
-                "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
-                "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
-            ]
+        # Removed language selection – always display both Marathi and English columns.
+        display_df = st.session_state.df[[
+            "Title_Marathi", "Author_Marathi",
+            "Title_English", "Author_English",
+            "Length", "Number of Acts", "Genre",
+            "First Performance Year", "Submitted By", "Male Characters", "Female Characters",
+            "Pages", "Property", "Year of Writing", "Availability", "YouTube", "Certified By"
+        ]].copy()
 
         # Filters
         st.sidebar.write("Filtering:")
@@ -188,14 +171,14 @@ if option == "Display Plays":
             selected_rows = [selected_rows]
 
         if selected_rows and selected_rows[0] is not None and "Select" in selected_rows[0]:
-            sel_index = selected_rows[0]["Select"]
-            selected_play = display_df.iloc[sel_index]["Title"].values[0]
+            sel_index = selected_rows[0]["Select"].values[0]
+            selected_play = display_df.iloc[sel_index]["Title_English"]
             st.session_state.selected_play = selected_play
-            #st.write(f"In if. selected_rows is {selected_rows}")
+            st.write(f"In if: Selected Play: {selected_play}")
         else:
             if "selected_play" not in st.session_state:
-                st.session_state.selected_play = display_df.iloc[0]["Title"]
-            #st.write(f"In else. selected_rows is {selected_rows}")
+                st.session_state.selected_play = display_df.iloc[0]["Title_English"]
+            st.write(f"In else: Selected Play: {st.session_state.selected_play}")
         st.write(f"Selected Play: {st.session_state.selected_play}")
 
         # Play details update section
@@ -208,7 +191,7 @@ if option == "Display Plays":
                     selected_play = st.session_state.selected_play
                 else:
                     selected_play = st.selectbox("Select a play", options=display_df["Title"])
-            filtered = display_df[display_df["Title"].astype(str) == str(selected_play)]
+            filtered = display_df[display_df["Title_English"].astype(str) == str(selected_play)]
             if not filtered.empty:
                 details = filtered.iloc[0].to_dict()
             else:
@@ -272,27 +255,14 @@ if option == "Display Plays":
             
             if st.button("Save Changes"):
                 if passphrase == st.secrets["credentials"]["passphrase"]:
-                    if display_language == "Marathi":
-                        title_col = "Title_Marathi"
-                        author_col = "Author_Marathi"
-                    else:
-                        title_col = "Title_English"
-                        author_col = "Author_English"
-                    
-                    # Update each field appropriately:
-                    for key, value in updated_details.items():
-                        if key == "Title":
-                            st.session_state.df.loc[
-                                st.session_state.df[title_col] == selected_play, title_col
-                            ] = value
-                        elif key == "Author":
-                            st.session_state.df.loc[
-                                st.session_state.df[author_col] == selected_play, author_col
-                            ] = value
-                        else:
-                            st.session_state.df.loc[
-                                st.session_state.df[title_col] == selected_play, key
-                            ] = value
+                    # Use Title_English as the unique identifier
+                    original_title_english = details.get("Title_English")
+                    mask = (st.session_state.df["Title_English"] == original_title_english)
+                    idx_list = st.session_state.df[mask].index.tolist()
+                    if idx_list:
+                        row_idx = idx_list[0]
+                        for key, value in updated_details.items():
+                            st.session_state.df.at[row_idx, key] = value
                     st.session_state.df.to_csv(csv_file, index=False)
                     st.success("Changes saved successfully!")
                 else:
