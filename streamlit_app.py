@@ -226,7 +226,7 @@ if option == "Display Plays":
             passphrase = st.text_input("Enter passphrase to save changes", type="password")
             
             if st.button("Save Changes"):
-                if passphrase == "nakat":  # Replace with your actual passphrase
+                if passphrase == st.secrets["credentials"]["passphrase"]:
                     if display_language == "Marathi":
                         title_col = "Title_Marathi"
                         author_col = "Author_Marathi"
