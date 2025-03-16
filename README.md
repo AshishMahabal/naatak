@@ -40,16 +40,20 @@ When making changes or adding new features, follow these guidelines:
 - Update the relevant sections for user input, state management, and CSV file persistence.
 - When adding or modifying input fields, ensure adjustments are made in both the “Add a New Play” form and the “Display Plays” update section.
 - Use Streamlit’s session_state to ensure data persists across interactions.
+
 ***Secrets Management:***
 - Keep sensitive information, such as the passphrase, out of the code by using the .streamlit/secrets.toml file.
 - Update the secrets file as needed and ensure it is excluded from version control (e.g., by using .gitignore).
+
 ***Testing and Validation:***
 - Thoroughly test the app on your local machine using various inputs.
 - Confirm that CSV updates and state management function correctly.
 - Validate updates using Streamlit’s error messages and interactive debugging.
+
 ***Documentation:***
 - Update this README and inline code comments to reflect new changes.
 - Communicate changes with the team via pull requests and code reviews.
+
 ***Deployment:***
 - If deploying on Streamlit Cloud or another platform, ensure that the environment’s secrets are properly configured.
 - Verify that the deployment version works correctly and that all new features are functional before pushing updates to production.
