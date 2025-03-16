@@ -116,7 +116,7 @@ if option == "Display Plays":
                     opt = filter_genre_options[idx]
                     if cols[j].checkbox(opt, key=f"filter_{opt}"):
                         filter_selected.append(opt)
-        act_options_sidebar = [1, 1.5, 2, 3, 4, 0, -1]
+        act_options_sidebar = [-1, 1, 1.5, 2, 3, 4, 0]
         acts = st.sidebar.radio("By Number of Acts", options=act_options_sidebar, horizontal=True)
         author_m = st.sidebar.text_input("By लेखक")
         year_min = st.sidebar.number_input("Filter by Min Year", min_value=1500, max_value=2024, value=1500)
@@ -230,7 +230,7 @@ if option == "Display Plays":
                                     upd_selected.append(g)
                     updated_value = "; ".join(upd_selected)
                 elif key == "Number of Acts":
-                    act_options = [1, 1.5, 2, 3, 4]
+                    act_options = [1, 1.5, 2, 3, 4, 0]
                     try:
                         default_index = act_options.index(value)
                     except ValueError:
@@ -304,7 +304,7 @@ elif option == "Add a New Play":
 
         # Optional Fields
         length = st.number_input("Length (in minutes)", min_value=1, help="Optional.")
-        act_options = [1, 1.5, 2, 3, 4]
+        act_options = [1, 1.5, 2, 3, 4, 0]
         num_acts = st.radio("Number of Acts", options=act_options, index=0, horizontal=True)
         st.write("Select Genre(s) (optional):")
         genre_options = ["Comedy", "Drama", "Farce", "Historical", "Musical", "Romance", "Satire", "Sci-Fi", "Tragedy", "Other"]
