@@ -11,13 +11,30 @@ The **naatak** app is a Streamlit-based interface for managing a database of Mar
 
 ## Features
 
-- **Interactive Data Display:** Plays are displayed as a table, with the ability to click on a play’s index or select via a dropdown to load its full details.
+- **Interactive Data Display:**  
+Plays are displayed as a table, with the ability to click on a play’s index or select via a dropdown to load its full details.
 - **Field-Specific Inputs:**  
   - Property and Number of Acts use horizontally arranged radio buttons.
   - Genre and Availability fields use checkboxes (with special logic, e.g. “NULL” being exclusive).
-- **Secure Updates:** Changes can only be saved if the user supplies the correct passphrase from the secrets, ensuring no sensitive info is hardcoded.
-- **CSV Persistence:** All changes are written back to a CSV file so that the data persists between sessions.
-- **Easy Customization:** The app uses Streamlit’s session_state alongside interactive widgets to manage state across reruns.
+- **Secure Updates:**  
+Changes can only be saved if the user supplies the correct passphrase from the secrets, ensuring no sensitive info is hardcoded.
+- **CSV Persistence:**  
+All changes are written back to a CSV file so that the data persists between sessions.
+- **Easy Customization:**  
+The app uses Streamlit’s `session_state` alongside interactive widgets to manage state across reruns.
+
+## Data Schema & Model
+
+The underlying CSV and data schema consists of the following fields:
+
+- **Title:** The title of the play (separate Marathi and English columns may exist based on display language).
+- **Author:** Author’s name (again may be split between Marathi and English).
+- **Genre:** A semicolon-separated string listing one or more genres (e.g., Comedy; Drama; Tragedy; Other).
+- **Number of Acts (acts):** The number of acts, allowed choices being 1, 1.5, 2, 3, or 4.
+- **Property:** Indicates the property available for the play, with fixed options (e.g., Unknown, No property, Minimal, Extensive, Different acts).
+- **Availability:** A set of checkboxes indicating various sources (e.g. Print, Abhivyakti, CALAA) with special conditions for "NULL".
+
+This schema serves as a contract between the user interface and the underlying CSV where the data is stored and updated.
 
 ## Setup & Installation
 
