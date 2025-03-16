@@ -159,16 +159,61 @@ if option == "Display Plays":
         display_df = display_df[(display_df["Female Characters"] >= female_chars_range[0]) & (display_df["Female Characters"] <= female_chars_range[1])]
 
         st.write(f"Number of plays found: {len(display_df)}")
-        # Display the filtered DataFrame
-        st.write(display_df)
+        # Insert a "Select" column showing row index.
+        display_df = display_df.reset_index(drop=True)
+        display_df.insert(0, "Select", display_df.index)
+
+        from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
+        st.write("#### Click the index (Select) button to choose a play:")
+        gb = GridOptionsBuilder.from_dataframe(display_df)
+
+        # Configure the "Select" column with a custom JS cell renderer that displays a styled button.
+        custom_cell_renderer = """
+        function(params) {
+            return '<button style="background-color:#2980b9; color:white; border:none; padding:5px 10px; border-radius:3px;">' + params.value + '</button>';
+        }
+        """
+        gb.configure_column("Select", headerName="Select", cellRenderer=custom_cell_renderer, width=80, suppressSizeToFit=True)
+
+        gb.configure_selection(selection_mode="single", use_checkbox=False)
+        grid_response = AgGrid(
+            display_df, 
+            gridOptions=gb.build(), 
+            update_mode=GridUpdateMode.SELECTION_CHANGED,
+            theme="streamlit",
+            allow_unsafe_jscode=True  # Enable the custom JS renderer
+        )
+        selected_rows = grid_response.get("selected_rows", [])
+        if not isinstance(selected_rows, list):
+            selected_rows = [selected_rows]
+
+        if selected_rows and selected_rows[0] is not None and "Select" in selected_rows[0]:
+            sel_index = selected_rows[0]["Select"]
+            selected_play = display_df.iloc[sel_index]["Title"].values[0]
+            st.session_state.selected_play = selected_play
+            #st.write(f"In if. selected_rows is {selected_rows}")
+        else:
+            if "selected_play" not in st.session_state:
+                st.session_state.selected_play = display_df.iloc[0]["Title"]
+            #st.write(f"In else. selected_rows is {selected_rows}")
+        st.write(f"Selected Play: {st.session_state.selected_play}")
 
         # Play details update section
         st.write("### Play Details")
         if not display_df.empty:
             col1, col2 = st.columns(2)
             with col1:
-                selected_play = st.selectbox("Select a play", options=display_df["Title"])
-            details = display_df[display_df["Title"] == selected_play].iloc[0].to_dict()
+                # Use the AgGrid-based selection if available.
+                if "selected_play" in st.session_state:
+                    selected_play = st.session_state.selected_play
+                else:
+                    selected_play = st.selectbox("Select a play", options=display_df["Title"])
+            filtered = display_df[display_df["Title"].astype(str) == str(selected_play)]
+            if not filtered.empty:
+                details = filtered.iloc[0].to_dict()
+            else:
+                st.error("No play found matching the selected title. Please re-check your selection!")
+                details = {}
             
             updated_details = {}
             for key, value in details.items():
