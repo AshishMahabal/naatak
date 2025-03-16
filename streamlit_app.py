@@ -324,34 +324,37 @@ elif option == "Add a New Play":
         certified_by = st.text_input("Certified By", help="Optional.")
 
         submitted = st.form_submit_button("Submit")
+        passphrase = st.text_input("Enter passphrase to submit the new play", type="password", key="passphrase_add")
         if submitted:
-            new_entry = {
-                "Title_Marathi": title_marathi,
-                "Title_English": title_english,
-                "Author_Marathi": author_marathi,
-                "Author_English": author_english,
-                "Length": length,
-                "Number of Acts": num_acts,
-                "Genre": genre,
-                "First Performance Year": first_year,
-                "Submitted By": submitted_by,
-                "Male Characters": male_chars,
-                "Female Characters": female_chars,
-                "Pages": pages,
-                "Property": property_val,
-                "Year of Writing": year_writing,
-                "Availability": availability,
-                "YouTube": youtube_link,
-                "Certified By": certified_by
-            }
-
-            if not title_marathi or not title_english or not author_marathi or not author_english:
-                st.error("Please fill out all compulsory fields: Title and Author (both Marathi and English).")
+            if passphrase != st.secrets["credentials"]["passphrase"]:
+                st.error("Incorrect passphrase. New play not added.")
             else:
-                st.session_state.df = pd.concat([st.session_state.df, pd.DataFrame([new_entry])], ignore_index=True)
-                save_to_csv()
-                st.success("New play added successfully!")
-                st.dataframe(st.session_state.df)
+                new_entry = {
+                    "Title_Marathi": title_marathi,
+                    "Title_English": title_english,
+                    "Author_Marathi": author_marathi,
+                    "Author_English": author_english,
+                    "Length": length,
+                    "Number of Acts": num_acts,
+                    "Genre": genre,
+                    "First Performance Year": first_year,
+                    "Submitted By": submitted_by,
+                    "Male Characters": male_chars,
+                    "Female Characters": female_chars,
+                    "Pages": pages,
+                    "Property": property_val,
+                    "Year of Writing": year_writing,
+                    "Availability": availability,
+                    "YouTube": youtube_link,
+                    "Certified By": certified_by
+                }
+                if not title_marathi or not title_english or not author_marathi or not author_english:
+                    st.error("Please fill out all compulsory fields: Title and Author (both Marathi and English).")
+                else:
+                    st.session_state.df = pd.concat([st.session_state.df, pd.DataFrame([new_entry])], ignore_index=True)
+                    save_to_csv()
+                    st.success("New play added successfully!")
+                    st.dataframe(st.session_state.df)
 
 # Export Data
 elif option == "Export Data":
