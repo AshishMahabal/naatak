@@ -142,6 +142,14 @@ if option == "Display Plays":
         display_df = display_df[(display_df["Female Characters"] >= female_chars_range[0]) & (display_df["Female Characters"] <= female_chars_range[1])]
 
         st.write(f"Number of plays found: {len(display_df)}")
+        # Reset selection when filters change.
+        if len(display_df) > 0:
+            st.session_state.selected_index = 0
+            st.session_state.selected_play = display_df.iloc[0]["Title_English"]
+        else:
+            st.session_state.selected_index = None
+            st.session_state.selected_play = ""
+
         # Insert a "Select" column showing row index.
         display_df = display_df.reset_index(drop=True)
         display_df.insert(0, "Select", display_df.index)
@@ -179,7 +187,10 @@ if option == "Display Plays":
             if "selected_play" not in st.session_state:
                 st.session_state.selected_play = display_df.iloc[0]["Title_English"]
             st.write(f"In else: Selected Play: {st.session_state.selected_play}")
-        st.write(f"Selected Play: {st.session_state.selected_play}")
+        if st.session_state.selected_index is None:
+            st.write("No play selected because no plays match the filter criteria.")
+        else:
+            st.write(f"Selected Play: {st.session_state.selected_play}")
 
         # Play details update section
         st.write("### Play Details")
