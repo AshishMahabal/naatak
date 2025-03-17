@@ -118,7 +118,13 @@ if option == "Display Plays":
                         filter_selected.append(opt)
         act_options_sidebar = [-1, 1, 1.5, 2, 3, 4, 0]
         acts = st.sidebar.radio("By Number of Acts", options=act_options_sidebar, horizontal=True)
-        author_m = st.sidebar.text_input("By लेखक")
+        author_e = st.sidebar.text_input("By Author (Romanized)")
+        if author_e:
+            display_df = display_df[display_df["Author_English"].str.contains(author_e, case=False, na=False)]
+
+        author_m = st.sidebar.text_input("By लेखक (Devanagari)")
+        if author_m:
+            display_df = display_df[display_df["Author_Marathi"].str.contains(author_m, case=False, na=False)]
         year_min = st.sidebar.number_input("Filter by Min Year", min_value=1500, max_value=2024, value=1500)
         year_max = st.sidebar.number_input("Filter by Max Year", min_value=1500, max_value=2024, value=2024)
         male_chars_range = st.sidebar.slider("Number of Male Characters", min_value=0, max_value=100, value=(0, 10))
@@ -134,8 +140,6 @@ if option == "Display Plays":
             display_df = display_df[display_df["Number of Acts"].isna()]
         # else:
         #     display_df = display_df[display_df["Number of Acts"] > 0]
-        if author_m:
-            display_df = display_df[display_df["Author"].str.contains(author_m, case=False, na=False)]
         display_df = display_df[(display_df["First Performance Year"] >= year_min) & 
                                 (display_df["First Performance Year"] <= year_max)]
         display_df = display_df[(display_df["Male Characters"] >= male_chars_range[0]) & (display_df["Male Characters"] <= male_chars_range[1])]
