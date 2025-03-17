@@ -279,7 +279,7 @@ if option == "Display Plays":
                             (st.session_state.df.index != row_idx)
                         ]
                         if not duplicate.empty:
-                            st.error("The updated English title already exists in another play. If this is a different play (for example, with a different author) suffix the English title with #2, #3 etc. Existing row(s):")
+                            st.error("The updated English title already exists in another play. If this is a different play (for example, with a different author) suffix the Marathi title with #2, #3 etc. Existing row(s):")
                             st.dataframe(duplicate)
                         else:
                             for key, value in updated_details.items():
@@ -344,10 +344,10 @@ elif option == "Add a New Play":
         availability = "; ".join(avail_selected)
         st.write("Selected: ", availability)
         youtube_link = st.text_input("YouTube (Link)", help="Optional.")
-        certified_by = st.text_input("Certified By", help="Optional.")
+        certified_by = st.text_input("Certified By", help="This field is compulsory.")
 
-        submitted = st.form_submit_button("Submit")
         passphrase = st.text_input("Enter passphrase to submit the new play", type="password", key="passphrase_add")
+        submitted = st.form_submit_button("Submit")
         if submitted:
             if passphrase != st.secrets["credentials"]["passphrase"]:
                 st.error("Incorrect passphrase. New play not added.")
@@ -357,7 +357,7 @@ elif option == "Add a New Play":
                     st.session_state.df["Title_English"].str.lower() == title_english.lower()
                 ]
                 if not duplicate.empty:
-                    st.error("A play with this English title already exists. If this is a different play (for example, with a different author) suffix the English title with #2, #3 etc. Existing row(s):")
+                    st.error("A play with this English title already exists. If this is a different play (for example, with a different author) suffix the Marathi title with #2, #3 etc. Existing row(s):")
                     st.dataframe(duplicate)
                 else:
                     new_entry = {
@@ -379,8 +379,8 @@ elif option == "Add a New Play":
                         "YouTube": youtube_link,
                         "Certified By": certified_by
                     }
-                    if not title_marathi or not title_english or not author_marathi or not author_english:
-                        st.error("Please fill out all compulsory fields: Title and Author (both Marathi and English).")
+                    if not title_marathi or not title_english or not author_marathi or not author_english or not certified_by:
+                        st.error("Please fill out all compulsory fields: Title (Marathi and English), Author (Marathi and English), and Certified By.")
                     else:
                         st.session_state.df = pd.concat([st.session_state.df, pd.DataFrame([new_entry])], ignore_index=True)
                         save_to_csv()
